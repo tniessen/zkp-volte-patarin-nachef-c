@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on: [push, pull_request]
 
@@ -25,3 +25,12 @@ jobs:
       run: sudo apt install -y valgrind
     - name: make memtest
       run: make memtest CC=${{ matrix.cc }}
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install clang-tidy
+      run: sudo apt install -y clang-tidy
+    - name: make lint
+      run: make lint

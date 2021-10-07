@@ -70,7 +70,7 @@ static int preallocate_sigma(zkp_proof* proof) {
     sigma[i].domain = params->domain;
     sigma[i].mapping = malloc(sizeof(unsigned int) * params->domain);
     if (sigma[i].mapping == NULL) {
-      while (--i != 0) {
+      while (i-- != 0) {
         free(sigma[i].mapping);
       }
       return 0;
@@ -225,10 +225,8 @@ const unsigned char* zkp_begin_round(zkp_proof* proof) {
 
   memset_random(secrets->k, COMMITMENT_SIZE * (params->d + 2));
 
-  // TODO: do not encode tau as a string?
-  char buf[16];
-  sprintf(buf, "%u", secrets->tau);
-  commit_hmac_sha256(secrets->k, (unsigned char*) buf, strlen(buf), proof->round.commitments);
+  // TODO: do not MAC the unsigned int
+  commit_hmac_sha256(secrets->k, (unsigned char*) &secrets->tau, sizeof(secrets->tau), proof->round.commitments);
 
   // TODO: do not MAC the unsigned ints, use bytes (but what about 5x5x5 that has a domain > 255?)
   for (unsigned int i = 0; i <= params->d; i++) {
@@ -308,10 +306,8 @@ int zkp_verify(zkp_verification* verification, const unsigned char* commitments,
     multiply_permutation(&sigma_d, &answer->q_eq_0.sigma_0);
 
     unsigned char md[COMMITMENT_SIZE];
-    // TODO: do not encode tau as a string?
-    char buf[16];
-    sprintf(buf, "%u", answer->q_eq_0.tau);
-    commit_hmac_sha256(answer->q_eq_0.k_star, (const unsigned char*) buf, strlen(buf), md);
+    // TODO: do not MAC the unsigned int
+    commit_hmac_sha256(answer->q_eq_0.k_star, (const unsigned char*) &answer->q_eq_0.tau, sizeof(answer->q_eq_0.tau), md);
     if (memcmp(md, commitments, COMMITMENT_SIZE) != 0) {
       return 0;
     }

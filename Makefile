@@ -11,6 +11,14 @@ CFLAGS = -std=c99 -Wall -Wextra -pedantic -Werror -O3 -g -Iinclude $^ -lcrypto -
 LIB_SOURCES = src/commitment.c src/protocol.c src/random.c src/params_3x3x3.c src/params_5x5x5.c src/params_s41.c
 TEST_SOURCES = test/test.c
 
+LINT_JOBS := $(addprefix lint~,$(LIB_SOURCES) $(TEST_SOURCES))
+
+.PHONY: lint ${LINT_JOBS}
+lint: ${LINT_JOBS}
+
+${LINT_JOBS}: lint~%:
+	clang-tidy $* -- $(CFLAGS)
+
 zkp-test: $(LIB_SOURCES) $(TEST_SOURCES)
 	$(CC) $(CFLAGS) -o $@
 

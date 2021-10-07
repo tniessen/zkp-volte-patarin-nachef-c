@@ -35,8 +35,14 @@ static void test_params(const zkp_params* params, unsigned int n_rounds) {
 }
 
 int main(void) {
-  test_params(zkp_params_3x3x3(), 510);
-  test_params(zkp_params_5x5x5(), 1009);
-  test_params(zkp_params_s41(), 260);
+  const unsigned int n_rounds_3x3x3 = 510;
+  test_params(zkp_params_3x3x3(), n_rounds_3x3x3);
+
+  const unsigned int n_rounds_5x5x5 = 1009;
+  test_params(zkp_params_5x5x5(), n_rounds_5x5x5);
+
+  const unsigned int n_rounds_s41 = 260;
+  test_params(zkp_params_s41(), n_rounds_s41);
+
   return 0;
 }

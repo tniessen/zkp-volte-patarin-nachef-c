@@ -1,5 +1,5 @@
-#ifndef __ZKP_PROTOCOL_H__
-#define __ZKP_PROTOCOL_H__
+#ifndef ZKP_VOLTE_PATARIN_NACHEF_PROTOCOL_H
+#define ZKP_VOLTE_PATARIN_NACHEF_PROTOCOL_H
 
 /**
  * Represents parameters for the protocol.
@@ -60,7 +60,7 @@ void zkp_free_private_key(const zkp_private_key* key);
  * @param key the private key
  * @return the computed public key
  */
-const zkp_public_key* zkp_compute_public_key(const zkp_private_key* key);
+const zkp_public_key* zkp_compute_public_key(const zkp_private_key* priv);
 
 /**
  * Frees a public key.
@@ -149,4 +149,4 @@ double zkp_get_impersonation_probability(zkp_verification* verification);
  */
 void zkp_free_verification(zkp_verification* verification);
 
-#endif // __ZKP_PROTOCOL_H__
+#endif // ZKP_VOLTE_PATARIN_NACHEF_PROTOCOL_H

@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include <zkp-volte-patarin-nachef/protocol.h>
 
 #include "random.h"
@@ -53,7 +55,7 @@ static inline void inverse_of_permutation(permutation* p) {
 }
 
 static inline void multiply_permutation(permutation* p, const permutation* f) {
-  // TODO: ensure domain is the same
+  assert(p->domain != 0 && p->domain == f->domain);
   STACK_ALLOC_PERMUTATION(t, p->domain);
   for (unsigned int i = 1; i <= t.domain; i++) {
     PERMUTATION_SET(&t, i, PERMUTATION_GET(f, PERMUTATION_GET(p, i)));

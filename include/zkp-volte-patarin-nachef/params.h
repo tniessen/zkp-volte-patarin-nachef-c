@@ -1,5 +1,5 @@
-#ifndef __ZKP_PARAMS_H__
-#define __ZKP_PARAMS_H__
+#ifndef ZKP_VOLTE_PATARIN_NACHEF_PARAMS_H
+#define ZKP_VOLTE_PATARIN_NACHEF_PARAMS_H
 
 #include "protocol.h"
 
@@ -39,4 +39,4 @@ const zkp_params* zkp_params_5x5x5(void);
  */
 const zkp_params* zkp_params_s41(void);
 
-#endif  // __ZKP_PARAMS_H__
+#endif  // ZKP_VOLTE_PATARIN_NACHEF_PARAMS_H
