@@ -25,8 +25,7 @@ static zkp_params params = {
   .H = { .base = NULL,
          .count = ZKP_PARAMS_S41_H_ORDER,
          .domain = ZKP_PARAMS_S41_DOMAIN },
-  .G_ = { .random_element = random_element_symmetric_group,
-          .context = (void*) &params },
+  .G_ = { .random_element = random_element_symmetric_group },
   .display_name = "S41",
 };
 

@@ -131,8 +131,7 @@ static inline int index_of_permutation_in_array(const permutation* p,
 }
 
 typedef struct {
-  void (*random_element)(permutation* out, void* context);
-  void* context;
+  void (*random_element)(permutation* out, const zkp_params* params);
 } permutation_group;
 
 struct zkp_params_s {
@@ -196,8 +195,8 @@ struct zkp_verification_s {
   unsigned int n_successful_rounds;
 };
 
-static inline void random_element_F_H(permutation* out, void* context) {
-  const zkp_params* params = context;
+static inline void random_element_F_H(permutation* out,
+                                      const zkp_params* params) {
   identity_permutation(out);
   const unsigned int m = params->d * 2;
   // We want F and H to be equally likely so we can choose a small value for m.
@@ -212,8 +211,8 @@ static inline void random_element_F_H(permutation* out, void* context) {
 }
 
 static inline void random_element_symmetric_group(permutation* out,
-                                                  void* context) {
-  (void) context;
+                                                  const zkp_params* params) {
+  (void) params;
   identity_permutation(out);
   for (unsigned int i = 2; i <= out->domain; i++) {
     unsigned int j = 1 + rand_less_than(i);

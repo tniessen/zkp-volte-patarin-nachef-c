@@ -598,7 +598,7 @@ static const zkp_params params = {
   .H = { .base = params_5x5x5_h,
          .count = ZKP_PARAMS_5X5X5_H_ORDER,
          .domain = ZKP_PARAMS_5X5X5_DOMAIN },
-  .G_ = { .random_element = random_element_F_H, .context = (void*) &params },
+  .G_ = { .random_element = random_element_F_H },
   .display_name = "5x5x5 Rubik's Cube",
 };
 

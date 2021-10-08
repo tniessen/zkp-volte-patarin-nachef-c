@@ -118,7 +118,7 @@ static const zkp_params params = {
   .H = { .base = params_3x3x3_h,
          .count = ZKP_PARAMS_3X3X3_H_ORDER,
          .domain = ZKP_PARAMS_3X3X3_DOMAIN },
-  .G_ = { .random_element = random_element_F_H, .context = (void*) &params },
+  .G_ = { .random_element = random_element_F_H },
   .display_name = "3x3x3 Rubik's Cube",
 };
 

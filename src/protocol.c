@@ -213,7 +213,7 @@ const unsigned char* zkp_begin_round(zkp_proof* proof) {
   zkp_round_secrets* secrets = &proof->round.secrets;
 
   secrets->tau = rand_less_than(params->H.count);
-  params->G_.random_element(&secrets->sigma[0], params->G_.context);
+  params->G_.random_element(&secrets->sigma[0], params);
 
   for (unsigned int j = 1; j <= params->d; j++) {
     // TODO: simplify these operations
