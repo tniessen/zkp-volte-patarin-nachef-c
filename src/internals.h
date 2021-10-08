@@ -18,19 +18,23 @@ typedef struct {
 #define STACK_ALLOC_PERMUTATION(name, domain_n)                                \
   permutation name = { .domain = (domain_n) };                                 \
   unsigned int __perm_##name##__mapping[name.domain];                          \
-  do { name.mapping = __perm_##name##__mapping; } while (0)
+  do {                                                                         \
+    name.mapping = __perm_##name##__mapping;                                   \
+  } while (0)
 
 #define PERMUTATION_SET(perm, index, value)                                    \
-  do { (perm)->mapping[(index) - 1] = value; } while (0)
+  do {                                                                         \
+    (perm)->mapping[((index)) - 1] = value;                                    \
+  } while (0)
 
-#define PERMUTATION_GET(perm, index) ((perm)->mapping[(index) - 1])
+#define PERMUTATION_GET(perm, index) ((perm)->mapping[((index)) - 1])
 
 #define PERMUTATION_ARRAY_GET(perm_array, perm_index, index)                   \
-  ((perm_array)->base[(perm_array)->count * ((index) - 1) + perm_index])
+  ((perm_array)->base[(perm_array)->count * (((index)) - 1) + (perm_index)])
 
 #define PERMUTATION_ARRAY_BASE_SET(perm_array, base, perm_index, index, value) \
   do {                                                                         \
-    ((base)[(perm_array)->count * ((index) - 1) + perm_index]) = value;        \
+    ((base)[(perm_array)->count * (((index)) - 1) + (perm_index)]) = (value);  \
   } while (0)
 
 static inline void identity_permutation(permutation* perm) {
@@ -39,7 +43,8 @@ static inline void identity_permutation(permutation* perm) {
   }
 }
 
-static inline void copy_permutation_into(permutation* dst, const permutation* src) {
+static inline void copy_permutation_into(permutation* dst,
+                                         const permutation* src) {
   // TODO: ensure that both permutations have the same domain
   for (unsigned int i = 0; i < src->domain; i++) {
     dst->mapping[i] = src->mapping[i];
@@ -63,38 +68,51 @@ static inline void multiply_permutation(permutation* p, const permutation* f) {
   copy_permutation_into(p, &t);
 }
 
-static inline void multiply_permutation_from_array(permutation* p, const permutation_array* f, unsigned int perm_index) {
+static inline void multiply_permutation_from_array(permutation* p,
+                                                   const permutation_array* f,
+                                                   unsigned int perm_index) {
   // TODO: ensure domain is the same
   STACK_ALLOC_PERMUTATION(t, p->domain);
   for (unsigned int i = 1; i <= t.domain; i++) {
-    PERMUTATION_SET(&t, i, PERMUTATION_ARRAY_GET(f, perm_index, PERMUTATION_GET(p, i)));
+    PERMUTATION_SET(
+        &t, i, PERMUTATION_ARRAY_GET(f, perm_index, PERMUTATION_GET(p, i)));
   }
   copy_permutation_into(p, &t);
 }
 
-static inline void copy_permutation_from_array(permutation* dst, const permutation_array* src, unsigned int perm_index) {
+static inline void copy_permutation_from_array(permutation* dst,
+                                               const permutation_array* src,
+                                               unsigned int perm_index) {
   // TODO: ensure domain is the same
   for (unsigned int i = 1; i <= dst->domain; i++) {
     PERMUTATION_SET(dst, i, PERMUTATION_ARRAY_GET(src, perm_index, i));
   }
 }
 
-static inline void store_permutation_interleaved(const permutation_array* array, unsigned int* base, unsigned int perm_index, const permutation* src) {
+static inline void store_permutation_interleaved(const permutation_array* array,
+                                                 unsigned int* base,
+                                                 unsigned int perm_index,
+                                                 const permutation* src) {
   for (unsigned int i = 1; i <= src->domain; i++) {
-    PERMUTATION_ARRAY_BASE_SET(array, base, perm_index, i, PERMUTATION_GET(src, i));
+    PERMUTATION_ARRAY_BASE_SET(array, base, perm_index, i,
+                               PERMUTATION_GET(src, i));
   }
 }
 
-static inline void multiply_permutation_from_array_inv(permutation* p, const permutation_array* f, unsigned int perm_index) {
+static inline void multiply_permutation_from_array_inv(
+    permutation* p, const permutation_array* f, unsigned int perm_index) {
   // TODO: ensure domain is the same
-  // TODO: it should be possible to make this more efficient (without extracting the permutation from the array first)
+  // TODO: it should be possible to make this more efficient (without extracting
+  // the permutation from the array first)
   STACK_ALLOC_PERMUTATION(t, p->domain);
   copy_permutation_from_array(&t, f, perm_index);
   inverse_of_permutation(&t);
   multiply_permutation(p, &t);
 }
 
-static inline int index_of_permutation_in_array(const permutation* p, const permutation_array* array, unsigned int* perm_index) {
+static inline int index_of_permutation_in_array(const permutation* p,
+                                                const permutation_array* array,
+                                                unsigned int* perm_index) {
   // TODO: ensure domain is the same
   for (unsigned int i = 0; i < array->count; i++) {
     unsigned int j;
@@ -182,15 +200,19 @@ static inline void random_element_F_H(permutation* out, void* context) {
   const zkp_params* params = context;
   identity_permutation(out);
   const unsigned int m = params->d * 2;
-  // We want F and H to be equally likely so we can choose a small-ish value for m.
+  // We want F and H to be equally likely so we can choose a small value for m.
   unsigned int f_factor = params->H.count / params->F.count;
   for (unsigned int i = 0; i < m; i++) {
-    unsigned int j = rand_less_than(params->H.count + f_factor * params->F.count);
-    multiply_permutation_from_array(out, j < params->H.count ? &params->H : &params->F, j < params->H.count ? j : (j - params->H.count) % params->F.count);
+    unsigned int j =
+        rand_less_than(params->H.count + f_factor * params->F.count);
+    multiply_permutation_from_array(
+        out, j < params->H.count ? &params->H : &params->F,
+        j < params->H.count ? j : (j - params->H.count) % params->F.count);
   }
 }
 
-static inline void random_element_symmetric_group(permutation* out, void* context) {
+static inline void random_element_symmetric_group(permutation* out,
+                                                  void* context) {
   (void) context;
   identity_permutation(out);
   for (unsigned int i = 2; i <= out->domain; i++) {

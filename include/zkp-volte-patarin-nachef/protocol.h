@@ -131,7 +131,8 @@ unsigned int zkp_choose_question(zkp_verification* verification);
  * @param answer the received answer
  * @return one of the answer is valid, zero if it is not
  */
-int zkp_verify(zkp_verification* verification, const unsigned char* commitments, const zkp_answer* answer);
+int zkp_verify(zkp_verification* verification, const unsigned char* commitments,
+               const zkp_answer* answer);
 
 /**
  * Returns an upper bound on the estimated impersonation probability based on
@@ -149,4 +150,4 @@ double zkp_get_impersonation_probability(zkp_verification* verification);
  */
 void zkp_free_verification(zkp_verification* verification);
 
-#endif // ZKP_VOLTE_PATARIN_NACHEF_PROTOCOL_H
+#endif  // ZKP_VOLTE_PATARIN_NACHEF_PROTOCOL_H

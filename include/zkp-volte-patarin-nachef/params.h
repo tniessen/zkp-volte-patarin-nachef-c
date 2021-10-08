@@ -16,7 +16,7 @@
 const zkp_params* zkp_params_3x3x3(void);
 
 #define ZKP_PARAMS_5X5X5_DOMAIN 288
-#define ZKP_PARAMS_5X5X5_ALPHA  12
+#define ZKP_PARAMS_5X5X5_ALPHA 12
 #define ZKP_PARAMS_5X5X5_H_ORDER 48
 #define ZKP_PARAMS_5X5X5_D 48
 

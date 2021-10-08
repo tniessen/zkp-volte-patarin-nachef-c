@@ -2,6 +2,8 @@
 
 #include "internals.h"
 
+// clang-format off
+
 #define PARAMS_3X3X3_F_INTERLEAVED \
    3, 17,  1,  1, 14,  1,  \
    5,  2,  2,  2, 12,  2,  \
@@ -100,7 +102,9 @@
   45, 44,  4,  5, 34, 39, 23, 18, 13, 12, 29, 28, 47, 42,  7,  2, 10, 15, 31, 26, 21, 20, 37, 36,  \
   46, 43,  3,  6, 40, 33, 17, 24, 14, 11, 30, 27, 41, 48,  1,  8, 16,  9, 25, 32, 22, 19, 38, 35,  \
   47, 42,  2,  7, 37, 36, 20, 21, 15, 10, 31, 26, 44, 45,  4,  5, 13, 12, 28, 29, 23, 18, 39, 34,  \
-  48, 41,  1,  8, 35, 38, 22, 19, 16,  9, 32, 25, 46, 43,  6,  3, 11, 14, 30, 27, 24, 17, 40, 33   \
+  48, 41,  1,  8, 35, 38, 22, 19, 16,  9, 32, 25, 46, 43,  6,  3, 11, 14, 30, 27, 24, 17, 40, 33
+
+// clang-format on
 
 static const unsigned int params_3x3x3_f[] = { PARAMS_3X3X3_F_INTERLEAVED };
 static const unsigned int params_3x3x3_h[] = { PARAMS_3X3X3_H_INTERLEAVED };
@@ -108,21 +112,14 @@ static const unsigned int params_3x3x3_h[] = { PARAMS_3X3X3_H_INTERLEAVED };
 static const zkp_params params = {
   .domain = ZKP_PARAMS_3X3X3_DOMAIN,
   .d = ZKP_PARAMS_3X3X3_D,
-  .F = {
-    .base = params_3x3x3_f,
-    .count = ZKP_PARAMS_3X3X3_ALPHA,
-    .domain = ZKP_PARAMS_3X3X3_DOMAIN
-  },
-  .H = {
-    .base = params_3x3x3_h,
-    .count = ZKP_PARAMS_3X3X3_H_ORDER,
-    .domain = ZKP_PARAMS_3X3X3_DOMAIN
-  },
-  .G_ = {
-    .random_element = random_element_F_H,
-    .context = (void*) &params
-  },
-  .display_name = "3x3x3 Rubik's Cube"
+  .F = { .base = params_3x3x3_f,
+         .count = ZKP_PARAMS_3X3X3_ALPHA,
+         .domain = ZKP_PARAMS_3X3X3_DOMAIN },
+  .H = { .base = params_3x3x3_h,
+         .count = ZKP_PARAMS_3X3X3_H_ORDER,
+         .domain = ZKP_PARAMS_3X3X3_DOMAIN },
+  .G_ = { .random_element = random_element_F_H, .context = (void*) &params },
+  .display_name = "3x3x3 Rubik's Cube",
 };
 
 const zkp_params* zkp_params_3x3x3(void) {

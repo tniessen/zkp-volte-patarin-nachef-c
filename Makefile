@@ -22,6 +22,14 @@ ${LINT_JOBS}: lint~%:
 zkp-test: $(LIB_SOURCES) $(TEST_SOURCES)
 	$(CC) $(CFLAGS) -o $@
 
+.PHONY: format
+format:
+	clang-format -i include/*/* src/* test/*
+
+.PHONY: check-format
+check-format:
+	clang-format --dry-run -Werror include/*/* src/* test/*
+
 .PHONY: clean
 clean:
 	rm -f zkp-test

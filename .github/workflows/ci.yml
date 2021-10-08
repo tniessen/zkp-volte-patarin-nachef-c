@@ -34,3 +34,12 @@ jobs:
       run: sudo apt install -y clang-tidy
     - name: make lint
       run: make lint
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install clang-format
+      run: sudo apt install -y clang-format
+    - name: make check-format
+      run: make check-format

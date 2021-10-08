@@ -2,6 +2,8 @@
 
 #include "internals.h"
 
+// clang-format off
+
 #define PARAMS_5X5X5_F_INTERLEAVED \
     1,  44,  49,   1,   5,   1,   1,   1,   1,   1,   1,   1,  \
     2,  39,   2,   2,  10,   2,   2,   2,  50,   2,   2,   2,  \
@@ -580,7 +582,9 @@
   285, 283, 270, 213, 244, 141, 268, 211, 246, 139, 198, 259, 126, 189, 237, 165,  69, 220, 172, 100, 196, 261, 124, 187, 235, 163,  67, 222, 174, 102, 150,  54, 115,  45,  93,  21,  76,  28, 148,  52, 117,  43,  91,  19,  78,  30,   6,   4,  \
   286, 278, 275, 214, 243, 142, 267, 206, 251, 134, 203, 254, 131, 190, 238, 166,  70, 219, 171,  99, 195, 262, 123, 182, 230, 158,  62, 227, 179, 107, 155,  59, 110,  46,  94,  22,  75,  27, 147,  51, 118,  38,  86,  14,  83,  35,  11,   3,  \
   287, 274, 279, 215, 242, 143, 266, 202, 255, 130, 207, 250, 135, 191, 239, 167,  71, 218, 170,  98, 194, 263, 122, 178, 226, 154,  58, 231, 183, 111, 159,  63, 106,  47,  95,  23,  74,  26, 146,  50, 119,  34,  82,  10,  87,  39,  15,   2,  \
-  288, 269, 284, 216, 241, 144, 265, 197, 260, 125, 212, 245, 140, 192, 240, 168,  72, 217, 169,  97, 193, 264, 121, 173, 221, 149,  53, 236, 188, 116, 164,  68, 101,  48,  96,  24,  73,  25, 145,  49, 120,  29,  77,   5,  92,  44,  20,   1   \
+  288, 269, 284, 216, 241, 144, 265, 197, 260, 125, 212, 245, 140, 192, 240, 168,  72, 217, 169,  97, 193, 264, 121, 173, 221, 149,  53, 236, 188, 116, 164,  68, 101,  48,  96,  24,  73,  25, 145,  49, 120,  29,  77,   5,  92,  44,  20,   1
+
+// clang-format on
 
 static const unsigned int params_5x5x5_f[] = { PARAMS_5X5X5_F_INTERLEAVED };
 static const unsigned int params_5x5x5_h[] = { PARAMS_5X5X5_H_INTERLEAVED };
@@ -588,21 +592,14 @@ static const unsigned int params_5x5x5_h[] = { PARAMS_5X5X5_H_INTERLEAVED };
 static const zkp_params params = {
   .domain = ZKP_PARAMS_5X5X5_DOMAIN,
   .d = ZKP_PARAMS_5X5X5_D,
-  .F = {
-    .base = params_5x5x5_f,
-    .count = ZKP_PARAMS_5X5X5_ALPHA,
-    .domain = ZKP_PARAMS_5X5X5_DOMAIN
-  },
-  .H = {
-    .base = params_5x5x5_h,
-    .count = ZKP_PARAMS_5X5X5_H_ORDER,
-    .domain = ZKP_PARAMS_5X5X5_DOMAIN
-  },
-  .G_ = {
-    .random_element = random_element_F_H,
-    .context = (void*) &params
-  },
-  .display_name = "5x5x5 Rubik's Cube"
+  .F = { .base = params_5x5x5_f,
+         .count = ZKP_PARAMS_5X5X5_ALPHA,
+         .domain = ZKP_PARAMS_5X5X5_DOMAIN },
+  .H = { .base = params_5x5x5_h,
+         .count = ZKP_PARAMS_5X5X5_H_ORDER,
+         .domain = ZKP_PARAMS_5X5X5_DOMAIN },
+  .G_ = { .random_element = random_element_F_H, .context = (void*) &params },
+  .display_name = "5x5x5 Rubik's Cube",
 };
 
 const zkp_params* zkp_params_5x5x5(void) {
