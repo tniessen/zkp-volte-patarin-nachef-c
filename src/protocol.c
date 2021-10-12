@@ -208,6 +208,27 @@ void zkp_free_public_key(const zkp_public_key* key) {
   free(key->mut_self);
 }
 
+int zkp_is_key_pair(const zkp_private_key* priv, const zkp_public_key* pub) {
+  if (priv->params != pub->params) {
+    return 0;
+  }
+
+  STACK_ALLOC_PERMUTATION(t, pub->x0.domain);
+  copy_permutation_into(&t, &pub->x0);
+
+  for (unsigned int j = 0; j < priv->params->d; j++) {
+    multiply_permutation_from_array(&t, &priv->params->F, priv->i[j]);
+  }
+
+  for (unsigned int i = 1; i <= priv->params->domain; i++) {
+    if (PERMUTATION_GET(&t, i) != i) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 const unsigned char* zkp_begin_round(zkp_proof* proof) {
   const zkp_params* params = proof->key->params;
   zkp_round_secrets* secrets = &proof->round.secrets;

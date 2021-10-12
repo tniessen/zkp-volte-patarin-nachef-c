@@ -70,6 +70,15 @@ const zkp_public_key* zkp_compute_public_key(const zkp_private_key* priv);
 void zkp_free_public_key(const zkp_public_key* key);
 
 /**
+ * Determines whether a private key and a public key form a key pair.
+ *
+ * @param priv a private key
+ * @param pub a public key
+ * @return 1 if the keys form a key pair, 0 otherwise
+ */
+int zkp_is_key_pair(const zkp_private_key* priv, const zkp_public_key* pub);
+
+/**
  * Creates a new instance of the zkp_proof struct and initializes it for use
  * with the given private key.
  *
