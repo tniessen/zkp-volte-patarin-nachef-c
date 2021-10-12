@@ -3,7 +3,6 @@
 
 #include <assert.h>
 #include <math.h>
-#include <stdio.h>
 #include <string.h>
 
 #define Q_NONE ((unsigned int) -1)
@@ -320,16 +319,16 @@ const unsigned char* zkp_begin_round(zkp_proof* proof) {
 
   memset_random(secrets->k, COMMITMENT_SIZE * (params->d + 2));
 
-  // TODO: do not MAC the unsigned int
-  commit_hmac_sha256(secrets->k, (unsigned char*) &secrets->tau,
-                     sizeof(secrets->tau), proof->round.commitments);
+  unsigned char repr[portable_repr_perm_size(params->domain)];
+  STACK_ALLOC_PERMUTATION(tau, params->domain);
+  copy_permutation_from_array(&tau, &params->H, secrets->tau);
+  encode_portable_repr_perm(&tau, repr);
+  commit_hmac_sha256(secrets->k, repr, sizeof(repr), proof->round.commitments);
 
-  // TODO: do not MAC the unsigned ints, use bytes (but what about 5x5x5 that
-  // has a domain > 255?)
   for (unsigned int i = 0; i <= params->d; i++) {
-    commit_hmac_sha256(secrets->k + (i + 1) * COMMITMENT_SIZE,
-                       (unsigned char*) secrets->sigma[i].mapping,
-                       secrets->sigma[i].domain * sizeof(unsigned int),
+    encode_portable_repr_perm(&secrets->sigma[i], repr);
+    commit_hmac_sha256(secrets->k + (i + 1) * COMMITMENT_SIZE, repr,
+                       sizeof(repr),
                        proof->round.commitments + (i + 1) * COMMITMENT_SIZE);
   }
 
@@ -420,24 +419,25 @@ int zkp_verify(zkp_verification* verification, const unsigned char* commitments,
     multiply_permutation_from_array(&sigma_d, &params->H, answer->q_eq_0.tau);
     multiply_permutation(&sigma_d, &answer->q_eq_0.sigma_0);
 
+    unsigned char repr[portable_repr_perm_size(params->domain)];
+    STACK_ALLOC_PERMUTATION(tau, params->domain);
+    copy_permutation_from_array(&tau, &params->H, answer->q_eq_0.tau);
+    encode_portable_repr_perm(&tau, repr);
+
     unsigned char md[COMMITMENT_SIZE];
-    // TODO: do not MAC the unsigned int
-    commit_hmac_sha256(answer->q_eq_0.k_star,
-                       (const unsigned char*) &answer->q_eq_0.tau,
-                       sizeof(answer->q_eq_0.tau), md);
+    commit_hmac_sha256(answer->q_eq_0.k_star, repr, sizeof(repr), md);
     if (memcmp(md, commitments, COMMITMENT_SIZE) != 0) {
       return 0;
     }
 
-    commit_hmac_sha256(
-        answer->q_eq_0.k_0, (unsigned char*) answer->q_eq_0.sigma_0.mapping,
-        answer->q_eq_0.sigma_0.domain * sizeof(unsigned int), md);
+    encode_portable_repr_perm(&answer->q_eq_0.sigma_0, repr);
+    commit_hmac_sha256(answer->q_eq_0.k_0, repr, sizeof(repr), md);
     if (memcmp(md, commitments + COMMITMENT_SIZE, COMMITMENT_SIZE) != 0) {
       return 0;
     }
 
-    commit_hmac_sha256(answer->q_eq_0.k_d, (unsigned char*) sigma_d.mapping,
-                       sigma_d.domain * sizeof(unsigned int), md);
+    encode_portable_repr_perm(&sigma_d, repr);
+    commit_hmac_sha256(answer->q_eq_0.k_d, repr, sizeof(repr), md);
     if (memcmp(md, commitments + COMMITMENT_SIZE * (1 + params->d),
                COMMITMENT_SIZE) != 0) {
       return 0;
@@ -451,19 +451,18 @@ int zkp_verify(zkp_verification* verification, const unsigned char* commitments,
     copy_permutation_from_array(&sigma_q_minus_1, &params->F, answer->q_ne_0.f);
     multiply_permutation(&sigma_q_minus_1, &answer->q_ne_0.sigma_q);
 
-    unsigned char md[COMMITMENT_SIZE];
+    unsigned char repr[portable_repr_perm_size(params->domain)];
+    encode_portable_repr_perm(&answer->q_ne_0.sigma_q, repr);
 
-    commit_hmac_sha256(
-        answer->q_ne_0.k_q, (unsigned char*) answer->q_ne_0.sigma_q.mapping,
-        answer->q_ne_0.sigma_q.domain * sizeof(unsigned int), md);
+    unsigned char md[COMMITMENT_SIZE];
+    commit_hmac_sha256(answer->q_ne_0.k_q, repr, sizeof(repr), md);
     if (memcmp(md, commitments + COMMITMENT_SIZE * (1 + answer->q),
                COMMITMENT_SIZE) != 0) {
       return 0;
     }
 
-    commit_hmac_sha256(answer->q_ne_0.k_q_minus_1,
-                       (unsigned char*) sigma_q_minus_1.mapping,
-                       sigma_q_minus_1.domain * sizeof(unsigned int), md);
+    encode_portable_repr_perm(&sigma_q_minus_1, repr);
+    commit_hmac_sha256(answer->q_ne_0.k_q_minus_1, repr, sizeof(repr), md);
     if (memcmp(md, commitments + COMMITMENT_SIZE * answer->q,
                COMMITMENT_SIZE) != 0) {
       return 0;
