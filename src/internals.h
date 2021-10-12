@@ -43,6 +43,23 @@ static inline void identity_permutation(permutation* perm) {
   }
 }
 
+static inline int is_permutation(permutation* perm) {
+  for (unsigned int i = 1; i <= perm->domain; i++) {
+    unsigned int v = PERMUTATION_GET(perm, i);
+    // The codomain must be { 1, 2, ..., n }.
+    if (v < 1 || v > perm->domain) {
+      return 0;
+    }
+    // The mapping must be injective (which implies bijective).
+    for (unsigned int j = 1; j < i; j++) {
+      if (v == PERMUTATION_GET(perm, j)) {
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
 static inline void copy_permutation_into(permutation* dst,
                                          const permutation* src) {
   // TODO: ensure that both permutations have the same domain

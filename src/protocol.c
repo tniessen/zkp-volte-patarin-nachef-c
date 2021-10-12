@@ -8,8 +8,46 @@
 
 #define Q_NONE ((unsigned int) -1)
 
+#define MAX_DOMAIN_SMALL_REPR 255
+
 const char* zkp_get_params_name(const zkp_params* params) {
   return params->display_name;
+}
+
+static inline unsigned int portable_repr_perm_size(unsigned int domain) {
+  return (domain > MAX_DOMAIN_SMALL_REPR ? 2 : 1) * domain;
+}
+
+static inline void encode_portable_repr_perm(const permutation* perm,
+                                             unsigned char* repr) {
+  unsigned int domain = perm->domain;
+  for (unsigned int j = 0; j < domain; j++) {
+    unsigned int val = PERMUTATION_GET(perm, j + 1);
+    if (domain > MAX_DOMAIN_SMALL_REPR) {
+      repr[2 * j] = val % MAX_DOMAIN_SMALL_REPR;
+      repr[2 * j + 1] = val / MAX_DOMAIN_SMALL_REPR;
+    } else {
+      repr[j] = val;
+    }
+  }
+}
+
+static inline int decode_portable_repr_perm(permutation* out,
+                                            const unsigned char* repr) {
+  for (unsigned int j = 0; j < out->domain; j++) {
+    unsigned int val;
+    if (out->domain > MAX_DOMAIN_SMALL_REPR) {
+      val = repr[2 * j] + repr[2 * j + 1] * MAX_DOMAIN_SMALL_REPR;
+    } else {
+      val = repr[j];
+    }
+    PERMUTATION_SET(out, j + 1, val);
+  }
+  return is_permutation(out);
+}
+
+unsigned int zkp_get_public_key_size(const zkp_params* params) {
+  return portable_repr_perm_size(params->domain);
 }
 
 static int preallocate_answer(zkp_proof* proof) {
@@ -201,6 +239,37 @@ const zkp_public_key* zkp_compute_public_key(const zkp_private_key* priv) {
   inverse_of_permutation(&pub->x0);
 
   return pub;
+}
+
+const zkp_public_key* zkp_import_public_key(const zkp_params* params,
+                                            const unsigned char* key_material) {
+  zkp_public_key* pub = malloc(sizeof(zkp_public_key));
+  if (pub == NULL) {
+    return NULL;
+  }
+
+  pub->mut_self = pub;
+
+  pub->params = params;
+
+  pub->x0.domain = params->domain;
+  pub->x0.mapping = malloc(params->domain * sizeof(unsigned int));
+  if (pub->x0.mapping == NULL) {
+    free(pub);
+    return NULL;
+  }
+
+  if (!decode_portable_repr_perm(&pub->x0, key_material)) {
+    zkp_free_public_key(pub);
+    return NULL;
+  }
+
+  return pub;
+}
+
+void zkp_export_public_key(const zkp_public_key* key,
+                           unsigned char* key_material) {
+  encode_portable_repr_perm(&key->x0, key_material);
 }
 
 void zkp_free_public_key(const zkp_public_key* key) {

@@ -40,6 +40,14 @@ typedef struct zkp_answer_s zkp_answer;
 const char* zkp_get_params_name(const zkp_params* params);
 
 /**
+ * Returns the size of the public key (when exported as a sequence of bytes).
+ *
+ * @param params the parameters
+ * @return the size of the exported public key, in bytes
+ */
+unsigned int zkp_get_public_key_size(const zkp_params* params);
+
+/**
  * Generates a private key for the given parameters.
  *
  * @param params the parameters
@@ -61,6 +69,26 @@ void zkp_free_private_key(const zkp_private_key* key);
  * @return the computed public key
  */
 const zkp_public_key* zkp_compute_public_key(const zkp_private_key* priv);
+
+/**
+ * Imports a public key.
+ *
+ * @param params the parameters
+ * @param key_material an octet sequence that represents a public key
+ */
+const zkp_public_key* zkp_import_public_key(const zkp_params* params,
+                                            const unsigned char* key_material);
+
+/**
+ * Exports a public key.
+ *
+ * Use zkp_get_public_key_size() to determine the required size of the buffer.
+ *
+ * @param key the key
+ * @param key_material a buffer to hold the public key
+ */
+void zkp_export_public_key(const zkp_public_key* key,
+                           unsigned char* key_material);
 
 /**
  * Frees a public key.

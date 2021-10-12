@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 
 #include <zkp-volte-patarin-nachef/params.h>
 #include <zkp-volte-patarin-nachef/protocol.h>
@@ -58,18 +59,49 @@ static void test_is_key_pair(const zkp_params* params) {
   zkp_free_public_key(b_pub);
 }
 
+static void test_import_export(const zkp_params* params) {
+  const zkp_private_key* private_key = zkp_generate_private_key(params);
+  assert(private_key);
+
+  const zkp_public_key* public_key = zkp_compute_public_key(private_key);
+  assert(public_key);
+
+  assert(zkp_is_key_pair(private_key, public_key));
+
+  unsigned int size = zkp_get_public_key_size(params);
+
+  unsigned char exported_public_key[size];
+  zkp_export_public_key(public_key, exported_public_key);
+  zkp_free_public_key(public_key);
+
+  public_key = zkp_import_public_key(params, exported_public_key);
+  assert(public_key);
+
+  unsigned char exported_public_key_2[size];
+  zkp_export_public_key(public_key, exported_public_key_2);
+  assert(memcmp(exported_public_key, exported_public_key_2, size) == 0);
+
+  assert(zkp_is_key_pair(private_key, public_key));
+
+  zkp_free_public_key(public_key);
+  zkp_free_private_key(private_key);
+}
+
 int main(void) {
   const unsigned int n_rounds_3x3x3 = 510;
   test_params(zkp_params_3x3x3(), n_rounds_3x3x3);
   test_is_key_pair(zkp_params_3x3x3());
+  test_import_export(zkp_params_3x3x3());
 
   const unsigned int n_rounds_5x5x5 = 884;
   test_params(zkp_params_5x5x5(), n_rounds_5x5x5);
   test_is_key_pair(zkp_params_5x5x5());
+  test_import_export(zkp_params_5x5x5());
 
   const unsigned int n_rounds_s41 = 260;
   test_params(zkp_params_s41(), n_rounds_s41);
   test_is_key_pair(zkp_params_s41());
+  test_import_export(zkp_params_s41());
 
   return 0;
 }
