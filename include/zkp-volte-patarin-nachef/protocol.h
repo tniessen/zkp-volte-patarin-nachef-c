@@ -48,6 +48,23 @@ const char* zkp_get_params_name(const zkp_params* params);
 unsigned int zkp_get_public_key_size(const zkp_params* params);
 
 /**
+ * Returns the maximal size of an answer (when exported as a sequence of bytes).
+ *
+ * @param params the parameters
+ * @return the maximal size of an answer, in bytes
+ */
+unsigned int zkp_get_max_answer_size(const zkp_params* params);
+
+/**
+ * Returns the size of an answer for a given question (when exported as a
+ * sequence of bytes).
+ *
+ * @param params the parameters
+ * @return the maximal size of an answer, in bytes
+ */
+unsigned int zkp_get_answer_size(const zkp_params* params, unsigned int q);
+
+/**
  * Generates a private key for the given parameters.
  *
  * @param params the parameters
@@ -166,10 +183,23 @@ unsigned int zkp_choose_question(zkp_verification* verification);
  * @param verification the zkp_verification instance
  * @param commitments the previously received commitments
  * @param answer the received answer
- * @return one of the answer is valid, zero if it is not
+ * @return one if the answer is valid, zero if it is not
  */
 int zkp_verify(zkp_verification* verification, const unsigned char* commitments,
                const zkp_answer* answer);
+
+/**
+ * Verifies received commitments against a received answer.
+ *
+ * @param verification the zkp_verification instance
+ * @param commitments the previously received commitments
+ * @param answer the received answer
+ * @param answer_size the size of the answer, in bytes
+ * @return one if the answer is valid, zero if it is not
+ */
+int zkp_import_verify(zkp_verification* verification,
+                      const unsigned char* commitments,
+                      const unsigned char* answer, unsigned int answer_size);
 
 /**
  * Returns an upper bound on the estimated impersonation probability based on

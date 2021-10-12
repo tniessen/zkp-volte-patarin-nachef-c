@@ -210,6 +210,7 @@ struct zkp_verification_s {
   const zkp_public_key* key;
   unsigned int q;
   unsigned int n_successful_rounds;
+  zkp_answer imported_answer;
 };
 
 static inline void random_element_F_H(permutation* out,

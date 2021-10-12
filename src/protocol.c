@@ -49,10 +49,25 @@ unsigned int zkp_get_public_key_size(const zkp_params* params) {
   return portable_repr_perm_size(params->domain);
 }
 
-static int preallocate_answer(zkp_proof* proof) {
-  const zkp_params* params = proof->key->params;
-  zkp_answer* answer = &proof->round.answer;
+unsigned int zkp_get_max_answer_size(const zkp_params* params) {
+  return zkp_get_answer_size(params, 0);
+}
 
+#define BITS_PER_BYTE 8
+#define FITS(a, b) ((a).count <= (1 << (((b)) * BITS_PER_BYTE)))
+
+static inline unsigned int tau_or_f_size(const zkp_params* params) {
+  assert((FITS(params->F, 1) && FITS(params->H, 1)) ||
+         params->F.count == params->H.count);
+  return FITS(params->F, 1) ? 1 : FITS(params->F, 2) ? 2 : 3;
+}
+
+unsigned int zkp_get_answer_size(const zkp_params* params, unsigned int q) {
+  return tau_or_f_size(params) + portable_repr_perm_size(params->domain) +
+         (q == 0 ? 3 : 2) * COMMITMENT_SIZE;
+}
+
+static int preallocate_answer(const zkp_params* params, zkp_answer* answer) {
   answer->q_eq_0.sigma_0.domain = params->domain;
   answer->q_eq_0.sigma_0.mapping =
       malloc(params->domain * sizeof(unsigned int));
@@ -93,8 +108,7 @@ static int preallocate_answer(zkp_proof* proof) {
   return 1;
 }
 
-static void free_preallocated_answer(zkp_proof* proof) {
-  zkp_answer* answer = &proof->round.answer;
+static void free_preallocated_answer(zkp_answer* answer) {
   free(answer->q_eq_0.sigma_0.mapping);
   free(answer->q_eq_0.k_star);
   free(answer->q_eq_0.k_0);
@@ -157,7 +171,7 @@ zkp_proof* zkp_new_proof(const zkp_private_key* key) {
     return NULL;
   }
 
-  if (!preallocate_answer(proof)) {
+  if (!preallocate_answer(key->params, &proof->round.answer)) {
     free(proof->round.secrets.sigma);
     free(proof->round.secrets.k);
     free(proof->round.commitments);
@@ -166,7 +180,7 @@ zkp_proof* zkp_new_proof(const zkp_private_key* key) {
   }
 
   if (!preallocate_sigma(proof)) {
-    free_preallocated_answer(proof);
+    free_preallocated_answer(&proof->round.answer);
     free(proof->round.secrets.sigma);
     free(proof->round.secrets.k);
     free(proof->round.commitments);
@@ -180,7 +194,7 @@ zkp_proof* zkp_new_proof(const zkp_private_key* key) {
 void zkp_free_proof(zkp_proof* proof) {
   free(proof->round.secrets.k);
   free(proof->round.commitments);
-  free_preallocated_answer(proof);
+  free_preallocated_answer(&proof->round.answer);
   free_preallocated_sigma(proof);
   free(proof->round.secrets.sigma);
   free(proof);
@@ -343,6 +357,11 @@ zkp_verification* zkp_new_verification(const zkp_public_key* key) {
     return NULL;
   }
 
+  if (!preallocate_answer(key->params, &verification->imported_answer)) {
+    free(verification);
+    return NULL;
+  }
+
   verification->key = key;
   verification->q = Q_NONE;
   verification->n_successful_rounds = 0;
@@ -476,6 +495,81 @@ int zkp_verify(zkp_verification* verification, const unsigned char* commitments,
   return 1;
 }
 
+static int import_answer(zkp_verification* verification,
+                         const unsigned char* bytes, unsigned int answer_size) {
+  zkp_answer* answer = &verification->imported_answer;
+  unsigned int q = verification->q;
+
+  if (answer_size != zkp_get_answer_size(verification->key->params, q)) {
+    return 0;
+  }
+
+  answer->q = q;
+
+  unsigned int perm_size =
+      portable_repr_perm_size(verification->key->params->domain);
+
+  if (verification->q == 0) {
+    const unsigned int tau_bytes = tau_or_f_size(verification->key->params);
+    answer->q_eq_0.tau = bytes[0];
+    if (tau_bytes > 1) {
+      answer->q_eq_0.tau |= bytes[1] << BITS_PER_BYTE;
+      if (tau_bytes > 2) {
+        answer->q_eq_0.tau |= bytes[2] << (2 * BITS_PER_BYTE);
+      }
+    }
+    bytes += tau_bytes;
+    answer_size -= tau_bytes;
+    if (!decode_portable_repr_perm(&answer->q_eq_0.sigma_0, bytes)) {
+      return 0;
+    }
+    bytes += perm_size;
+    answer_size -= perm_size;
+    memcpy(answer->q_eq_0.k_star, bytes, COMMITMENT_SIZE);
+    bytes += COMMITMENT_SIZE;
+    answer_size -= COMMITMENT_SIZE;
+    memcpy(answer->q_eq_0.k_0, bytes, COMMITMENT_SIZE);
+    bytes += COMMITMENT_SIZE;
+    answer_size -= COMMITMENT_SIZE;
+    memcpy(answer->q_eq_0.k_d, bytes, COMMITMENT_SIZE);
+    answer_size -= COMMITMENT_SIZE;
+  } else {
+    const unsigned int tau_bytes = tau_or_f_size(verification->key->params);
+    answer->q_ne_0.f = bytes[0];
+    if (tau_bytes > 1) {
+      answer->q_ne_0.f |= bytes[1] << BITS_PER_BYTE;
+      if (tau_bytes > 2) {
+        answer->q_ne_0.f |= bytes[2] << (2 * BITS_PER_BYTE);
+      }
+    }
+    bytes += tau_bytes;
+    answer_size -= tau_bytes;
+    if (!decode_portable_repr_perm(&answer->q_ne_0.sigma_q, bytes)) {
+      return 0;
+    }
+    bytes += perm_size;
+    answer_size -= perm_size;
+    memcpy(answer->q_ne_0.k_q_minus_1, bytes, COMMITMENT_SIZE);
+    bytes += COMMITMENT_SIZE;
+    answer_size -= COMMITMENT_SIZE;
+    memcpy(answer->q_ne_0.k_q, bytes, COMMITMENT_SIZE);
+    answer_size -= COMMITMENT_SIZE;
+  }
+
+  assert(answer_size == 0);
+  return 1;
+}
+
+int zkp_import_verify(zkp_verification* verification,
+                      const unsigned char* commitments,
+                      const unsigned char* answer, unsigned int answer_size) {
+  if (!import_answer(verification, answer, answer_size)) {
+    return 0;
+  }
+
+  return zkp_verify(verification, commitments, &verification->imported_answer);
+}
+
 double zkp_get_impersonation_probability(zkp_verification* verification) {
   unsigned int d = verification->key->params->d;
   double p = (double) d / (double) (d + 1);
@@ -483,5 +577,6 @@ double zkp_get_impersonation_probability(zkp_verification* verification) {
 }
 
 void zkp_free_verification(zkp_verification* verification) {
+  free_preallocated_answer(&verification->imported_answer);
   free(verification);
 }
