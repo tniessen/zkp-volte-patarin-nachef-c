@@ -9,6 +9,9 @@
 #include "vectors_3x3x3.h"
 #include "vectors_5x5x5.h"
 #include "vectors_s41.h"
+#include "vectors_s41ast.h"
+#include "vectors_s43ast.h"
+#include "vectors_s53ast.h"
 
 static void test_params(const zkp_params* params, unsigned int n_rounds) {
   const zkp_private_key* private_key = zkp_generate_private_key(params);
@@ -179,6 +182,93 @@ static void test_precomputed_vectors_s41(void) {
   zkp_free_public_key(key);
 }
 
+static void test_precomputed_vectors_s41ast(void) {
+  const unsigned char mat[] = { TEST_S41_AST_PUBLIC_KEY };
+  assert(sizeof(mat) == zkp_get_public_key_size(zkp_params_s41ast()));
+
+  const zkp_public_key* key = zkp_import_public_key(zkp_params_s41ast(), mat);
+  assert(key);
+
+  zkp_verification* verification = zkp_new_verification(key);
+  assert(verification);
+
+  const unsigned char commitments[] = { TEST_S41_AST_COMMITMENTS };
+
+  uint64_t remaining_q = ((uint64_t) 1 << (ZKP_PARAMS_S41_AST_D + 1)) - 1;
+
+  while (remaining_q != 0) {
+    unsigned int q = zkp_choose_question(verification);
+    unsigned int answer_size = 0;
+    const unsigned char* answer = test_s41ast_get_answer(q, &answer_size);
+    assert(answer_size == zkp_get_answer_size(zkp_params_s41ast(), q));
+    assert(answer_size <= zkp_get_max_answer_size(zkp_params_s41ast()));
+    int ok = zkp_import_verify(verification, commitments, answer, answer_size);
+    assert(ok);
+    remaining_q &= ~(1 << q);
+  }
+
+  zkp_free_verification(verification);
+  zkp_free_public_key(key);
+}
+
+static void test_precomputed_vectors_s43ast(void) {
+  const unsigned char mat[] = { TEST_S43_AST_PUBLIC_KEY };
+  assert(sizeof(mat) == zkp_get_public_key_size(zkp_params_s43ast()));
+
+  const zkp_public_key* key = zkp_import_public_key(zkp_params_s43ast(), mat);
+  assert(key);
+
+  zkp_verification* verification = zkp_new_verification(key);
+  assert(verification);
+
+  const unsigned char commitments[] = { TEST_S43_AST_COMMITMENTS };
+
+  uint64_t remaining_q = ((uint64_t) 1 << (ZKP_PARAMS_S43_AST_D + 1)) - 1;
+
+  while (remaining_q != 0) {
+    unsigned int q = zkp_choose_question(verification);
+    unsigned int answer_size = 0;
+    const unsigned char* answer = test_s43ast_get_answer(q, &answer_size);
+    assert(answer_size == zkp_get_answer_size(zkp_params_s43ast(), q));
+    assert(answer_size <= zkp_get_max_answer_size(zkp_params_s43ast()));
+    int ok = zkp_import_verify(verification, commitments, answer, answer_size);
+    assert(ok);
+    remaining_q &= ~(1 << q);
+  }
+
+  zkp_free_verification(verification);
+  zkp_free_public_key(key);
+}
+
+static void test_precomputed_vectors_s53ast(void) {
+  const unsigned char mat[] = { TEST_S53_AST_PUBLIC_KEY };
+  assert(sizeof(mat) == zkp_get_public_key_size(zkp_params_s53ast()));
+
+  const zkp_public_key* key = zkp_import_public_key(zkp_params_s53ast(), mat);
+  assert(key);
+
+  zkp_verification* verification = zkp_new_verification(key);
+  assert(verification);
+
+  const unsigned char commitments[] = { TEST_S53_AST_COMMITMENTS };
+
+  uint64_t remaining_q = ((uint64_t) 1 << (ZKP_PARAMS_S53_AST_D + 1)) - 1;
+
+  while (remaining_q != 0) {
+    unsigned int q = zkp_choose_question(verification);
+    unsigned int answer_size = 0;
+    const unsigned char* answer = test_s53ast_get_answer(q, &answer_size);
+    assert(answer_size == zkp_get_answer_size(zkp_params_s53ast(), q));
+    assert(answer_size <= zkp_get_max_answer_size(zkp_params_s53ast()));
+    int ok = zkp_import_verify(verification, commitments, answer, answer_size);
+    assert(ok);
+    remaining_q &= ~(1 << q);
+  }
+
+  zkp_free_verification(verification);
+  zkp_free_public_key(key);
+}
+
 int main(void) {
   const unsigned int n_rounds_3x3x3 = 510;
   test_params(zkp_params_3x3x3(), n_rounds_3x3x3);
@@ -195,9 +285,27 @@ int main(void) {
   test_is_key_pair(zkp_params_s41());
   test_import_export(zkp_params_s41());
 
+  const unsigned int n_rounds_s41ast = 239;
+  test_params(zkp_params_s41ast(), n_rounds_s41ast);
+  test_is_key_pair(zkp_params_s41ast());
+  test_import_export(zkp_params_s41ast());
+
+  const unsigned int n_rounds_s43ast = 219;
+  test_params(zkp_params_s43ast(), n_rounds_s43ast);
+  test_is_key_pair(zkp_params_s43ast());
+  test_import_export(zkp_params_s43ast());
+
+  const unsigned int n_rounds_s53ast = 260;
+  test_params(zkp_params_s53ast(), n_rounds_s53ast);
+  test_is_key_pair(zkp_params_s53ast());
+  test_import_export(zkp_params_s53ast());
+
   test_precomputed_vectors_3x3x3();
   test_precomputed_vectors_5x5x5();
   test_precomputed_vectors_s41();
+  test_precomputed_vectors_s41ast();
+  test_precomputed_vectors_s43ast();
+  test_precomputed_vectors_s53ast();
 
   return 0;
 }
