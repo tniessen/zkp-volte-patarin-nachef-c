@@ -49,6 +49,11 @@ unsigned int zkp_get_public_key_size(const zkp_params* params) {
   return portable_repr_perm_size(params->domain);
 }
 
+unsigned int zkp_get_commitments_size(const zkp_params* params) {
+  // Commitments for tau, sigma_0, sigma_1, ..., sigma_d.
+  return COMMITMENT_SIZE * (2 + params->d);
+}
+
 unsigned int zkp_get_max_answer_size(const zkp_params* params) {
   return zkp_get_answer_size(params, 0);
 }
@@ -156,14 +161,14 @@ zkp_proof* zkp_new_proof(const zkp_private_key* key) {
     return NULL;
   }
 
-  proof->round.secrets.k = malloc(COMMITMENT_SIZE * (2 + key->params->d));
+  proof->round.secrets.k = malloc(zkp_get_commitments_size(key->params));
   if (proof->round.secrets.k == NULL) {
     free(proof->round.secrets.sigma);
     free(proof);
     return NULL;
   }
 
-  proof->round.commitments = malloc(COMMITMENT_SIZE * (2 + key->params->d));
+  proof->round.commitments = malloc(zkp_get_commitments_size(key->params));
   if (proof->round.commitments == NULL) {
     free(proof->round.secrets.sigma);
     free(proof->round.secrets.k);
@@ -331,7 +336,7 @@ const unsigned char* zkp_begin_round(zkp_proof* proof) {
     multiply_permutation(&secrets->sigma[j], &secrets->sigma[j - 1]);
   }
 
-  memset_random(secrets->k, COMMITMENT_SIZE * (params->d + 2));
+  memset_random(secrets->k, zkp_get_commitments_size(params));
 
   unsigned char repr[portable_repr_perm_size(params->domain)];
   STACK_ALLOC_PERMUTATION(tau, params->domain);

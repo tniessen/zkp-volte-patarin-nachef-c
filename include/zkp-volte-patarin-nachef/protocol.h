@@ -48,6 +48,14 @@ const char* zkp_get_params_name(const zkp_params* params);
 unsigned int zkp_get_public_key_size(const zkp_params* params);
 
 /**
+ * Returns the size of the commitments within a single round.
+ *
+ * @param params the parameters
+ * @return the size of the commitments
+ */
+unsigned int zkp_get_commitments_size(const zkp_params* params);
+
+/**
  * Returns the maximal size of an answer (when exported as a sequence of bytes).
  *
  * @param params the parameters
