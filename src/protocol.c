@@ -49,6 +49,12 @@ unsigned int zkp_get_public_key_size(const zkp_params* params) {
   return portable_repr_perm_size(params->domain);
 }
 
+double zkp_get_key_space_log2(const zkp_params* params) {
+  // This is potentially more accurate than log2(pow(|F|, d)) and equivalent
+  // because log2(pow(|F|, d)) = d * log2(|F|).
+  return params->d * log2((double) params->F.count);
+}
+
 unsigned int zkp_get_commitments_size(const zkp_params* params) {
   // Commitments for tau, sigma_0, sigma_1, ..., sigma_d.
   return COMMITMENT_SIZE * (2 + params->d);

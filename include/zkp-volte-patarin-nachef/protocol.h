@@ -48,6 +48,17 @@ const char* zkp_get_params_name(const zkp_params* params);
 unsigned int zkp_get_public_key_size(const zkp_params* params);
 
 /**
+ * Returns the base-2 logarithm of the size of the private key space.
+ *
+ * This function is useful for estimating upper bounds for the security of a
+ * parameter set. Mathematically, this is log2(|F|^d).
+ *
+ * @param params the parameters
+ * @return the base-2 logarithm of |F|^d
+ */
+double zkp_get_key_space_log2(const zkp_params* params);
+
+/**
  * Returns the size of the commitments within a single round.
  *
  * @param params the parameters
