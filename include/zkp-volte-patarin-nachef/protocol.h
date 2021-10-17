@@ -79,7 +79,8 @@ unsigned int zkp_get_max_answer_size(const zkp_params* params);
  * sequence of bytes).
  *
  * @param params the parameters
- * @return the maximal size of an answer, in bytes
+ * @param q the question (challenge)
+ * @return the size of the answer, in bytes
  */
 unsigned int zkp_get_answer_size(const zkp_params* params, unsigned int q);
 
@@ -101,7 +102,7 @@ void zkp_free_private_key(const zkp_private_key* key);
 /**
  * Computes the public key from a private key.
  *
- * @param key the private key
+ * @param priv the private key
  * @return the computed public key
  */
 const zkp_public_key* zkp_compute_public_key(const zkp_private_key* priv);
