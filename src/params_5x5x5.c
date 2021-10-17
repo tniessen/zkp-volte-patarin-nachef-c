@@ -586,8 +586,8 @@
 
 // clang-format on
 
-static const unsigned int params_5x5x5_f[] = { PARAMS_5X5X5_F_INTERLEAVED };
-static const unsigned int params_5x5x5_h[] = { PARAMS_5X5X5_H_INTERLEAVED };
+static const uint16_t params_5x5x5_f[] = { PARAMS_5X5X5_F_INTERLEAVED };
+static const uint16_t params_5x5x5_h[] = { PARAMS_5X5X5_H_INTERLEAVED };
 
 static const zkp_params params = {
   .domain = ZKP_PARAMS_5X5X5_DOMAIN,

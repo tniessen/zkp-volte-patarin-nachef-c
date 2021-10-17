@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdint.h>
 
 #include <zkp-volte-patarin-nachef/protocol.h>
 
@@ -10,7 +11,7 @@ typedef struct {
 } permutation;
 
 typedef struct {
-  const unsigned int* base;
+  const uint16_t* base;
   unsigned int domain;
   unsigned int count;
 } permutation_array;
@@ -107,7 +108,7 @@ static inline void copy_permutation_from_array(permutation* dst,
 }
 
 static inline void store_permutation_interleaved(const permutation_array* array,
-                                                 unsigned int* base,
+                                                 uint16_t* base,
                                                  unsigned int perm_index,
                                                  const permutation* src) {
   for (unsigned int i = 1; i <= src->domain; i++) {

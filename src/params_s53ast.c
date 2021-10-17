@@ -30,9 +30,9 @@ static zkp_params params = {
 };
 
 static inline void init_dynamically_allocated(void) {
-  unsigned int* params_s53ast_h =
+  uint16_t* params_s53ast_h =
       malloc(ZKP_PARAMS_S53_AST_H_ORDER * ZKP_PARAMS_S53_AST_DOMAIN *
-             sizeof(unsigned int));
+             sizeof(uint16_t));
   assert(params_s53ast_h != NULL);
   params.H.base = params_s53ast_h;
 
@@ -51,9 +51,8 @@ static inline void init_dynamically_allocated(void) {
     assert(PERMUTATION_GET(&acc, i) == i);
   }
 
-  unsigned int* params_s53ast_f =
-      malloc(ZKP_PARAMS_S53_AST_ALPHA * ZKP_PARAMS_S53_AST_DOMAIN *
-             sizeof(unsigned int));
+  uint16_t* params_s53ast_f = malloc(
+      ZKP_PARAMS_S53_AST_ALPHA * ZKP_PARAMS_S53_AST_DOMAIN * sizeof(uint16_t));
   assert(params_s53ast_f != NULL);
   params.F.base = params_s53ast_f;
 
