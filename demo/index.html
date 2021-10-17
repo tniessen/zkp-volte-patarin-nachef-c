@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Parameter sets for the zero-knowledge protocol</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        border: none;
+        color: inherit;
+        background-color: transparent;
+      }
+      html {
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.5;
+        color: black;
+      }
+      .container {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 1500px;
+        padding: 1rem 0;
+      }
+      .section {
+        margin-top: 2.5rem;
+      }
+      .inactive {
+        color: gray;
+      }
+      #stats-table {
+        border-collapse: collapse;
+        text-indent: 0;
+        width: 100%;
+        text-align: center;
+      }
+      th, td {
+        border: 1px solid gray;
+        padding: 0.5rem 1rem 0.5rem 1rem;
+      }
+      tr.success {
+        background-color: rgb(167, 243, 208);
+      }
+      button {
+        border: 1px solid gray;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        margin-right: 0.5rem;
+        cursor: pointer;
+      }
+      button:disabled {
+        color: gray;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Parameter sets &mdash; demonstration</h1>
+      <div class="section">
+        <button type="button" id="resume-button">&#x23e9;&#xfe0e; Resume</button>
+        <button type="button" id="pause-button" disabled>&#x23f8;&#xfe0e; Pause</button>
+        <span id="status-label"></span>
+      </div>
+      <div class="section">
+        <table id="stats-table" class="section">
+          <thead>
+            <tr>
+              <th rowspan="2"></th>
+              <th rowspan="2">Parameter set</th>
+              <th rowspan="2">Strength</th>
+              <th rowspan="2">Rounds</th>
+              <th rowspan="2">Impersonation<br>probabilty</th>
+              <th rowspan="2">VM heap</th>
+              <th colspan="2">Data transfer</th>
+              <th colspan="2">HMAC invocations</th>
+            </tr>
+            <tr>
+              <th>Prover</th>
+              <th>Verifier</th>
+              <th>Prover</th>
+              <th>Verifier</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div class="section">
+        <small id="app-info">View the code on <a href="https://github.com/tniessen/zkp-volte-patarin-nachef-c">GitHub</a>.</small>
+      </div>
+    </div>
+    <script src="sodium.js"></script>
+    <script src="demo.js"></script>
+  </body>
+</html>

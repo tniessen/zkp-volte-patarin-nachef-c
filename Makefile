@@ -22,6 +22,27 @@ ${LINT_JOBS}: lint~%:
 zkp-test: $(LIB_SOURCES) $(TEST_SOURCES)
 	$(CC) $(CFLAGS) -o $@
 
+.PHONY: demo
+demo: demo/lib.wasm demo/sodium.js
+
+demo/lib.wasm: $(LIB_SOURCES)
+	clang -flto -O3 -Wall -Wextra -pedantic -Werror \
+	  -Wno-unused-function \
+	  --target=wasm32-unknown-wasi \
+	  --sysroot wasi-sdk-12.0/share/wasi-sysroot/ \
+	  -Wl,--export-all \
+	  -Wl,--no-entry \
+	  -nostartfiles \
+	  -D__WASM__ \
+	  -Iinclude \
+	  -Wl,--lto-O3, \
+	  -Wl,-z,stack-size=65536 \
+	  -o $@ \
+	  $^
+
+demo/sodium.js:
+	wget -O $@ 'https://raw.githubusercontent.com/jedisct1/libsodium.js/f68bf71c8554e9f1d60556d400e616acf578a073/dist/browsers-sumo/sodium.js'
+
 .PHONY: format
 format:
 	clang-format -i include/*/* src/* test/*
@@ -32,4 +53,4 @@ check-format:
 
 .PHONY: clean
 clean:
-	rm -f zkp-test
+	rm -f zkp-test demo/lib.wasm

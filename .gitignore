@@ -1,2 +1,4 @@
 zkp-test
 .vscode/
+demo/lib.wasm
+demo/sodium.js

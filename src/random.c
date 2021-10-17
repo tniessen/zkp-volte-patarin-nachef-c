@@ -1,12 +1,26 @@
 #include "random.h"
 
-#include <assert.h>
+#include <limits.h>
 
+#ifndef __WASM__
+
+#include <assert.h>
 #include <openssl/rand.h>
 
-void memset_random(void* ptr, size_t n) {
-  int ret = RAND_bytes((unsigned char*) ptr, n);
+static inline void crypto_rand_bytes(unsigned char* ptr, size_t n) {
+  int ret = RAND_bytes(ptr, n);
   assert(ret);
+}
+
+#else
+
+__attribute__((import_module("crypto"), import_name("randomBytes"))) extern void
+crypto_rand_bytes(unsigned char* ptr, size_t n);
+
+#endif
+
+void memset_random(void* ptr, size_t n) {
+  crypto_rand_bytes((unsigned char*) ptr, n);
 }
 
 static inline int is_unbiased(unsigned int value, unsigned int excl_max) {
